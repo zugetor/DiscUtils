@@ -3,6 +3,7 @@
     <Description>DiscUtils Btrfs</Description>
     <Authors>Bianco Veigel</Authors>
     <PackageTags>DiscUtils;Btrfs</PackageTags>
+    <TargetFrameworks>netstandard2.0;net48;net5.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

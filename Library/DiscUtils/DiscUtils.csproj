@@ -3,6 +3,7 @@
     <Description>DiscUtils, complete meta-package</Description>
     <Authors>Kenneth Bell;LordMike</Authors>
     <PackageTags>DiscUtils</PackageTags>
+    <TargetFrameworks>netstandard2.0;net48;net5.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +13,7 @@
     <ProjectReference Include="..\DiscUtils.Dmg\DiscUtils.Dmg.csproj" />
     <ProjectReference Include="..\DiscUtils.Ext\DiscUtils.Ext.csproj" />
     <ProjectReference Include="..\DiscUtils.Fat\DiscUtils.Fat.csproj" />
+    <ProjectReference Include="..\DiscUtils.Hfs\DiscUtils.Hfs.csproj" />
     <ProjectReference Include="..\DiscUtils.HfsPlus\DiscUtils.HfsPlus.csproj" />
     <ProjectReference Include="..\DiscUtils.Iscsi\DiscUtils.Iscsi.csproj" />
     <ProjectReference Include="..\DiscUtils.Iso9660\DiscUtils.Iso9660.csproj" />
