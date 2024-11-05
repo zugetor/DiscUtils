@@ -13,8 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscUtils.Common\DiscUtils.Common.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Core\DiscUtils.Core.csproj" />
-    <ProjectReference Include="..\..\Library\DiscUtils.BootConfig\DiscUtils.BootConfig.csproj" />
-    <ProjectReference Include="..\..\Library\DiscUtils.Registry\DiscUtils.Registry.csproj" />
   </ItemGroup>
 
 </Project>

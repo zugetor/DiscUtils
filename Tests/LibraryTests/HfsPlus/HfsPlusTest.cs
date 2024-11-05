@@ -21,8 +21,8 @@
 //
 
 using DiscUtils;
-using DiscUtils.Dmg;
 using DiscUtils.HfsPlus;
+using DiscUtils.Raw;
 using DiscUtils.Setup;
 using DiscUtils.Streams;
 using System.Collections.Generic;
@@ -31,11 +31,11 @@ using Xunit;
 
 namespace LibraryTests.HfsPlus
 {
-    public class HfsPlusTest
+    public class HfsTest
     {
         private const string SystemVersionPath = @"System\Library\CoreServices\SystemVersion.plist";
         private const string DeviceSupportPath = "/Applications/Xcode.app/Content/Developer/Platforms/iPhoneOS.Platform/DeviceSupport/";
-        static HfsPlusTest()
+        static HfsTest()
         {
             SetupHelper.RegisterAssembly(typeof(HfsPlusFileSystem).Assembly);
         }

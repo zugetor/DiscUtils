@@ -14,7 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscUtils.Common\DiscUtils.Common.csproj" />
     <ProjectReference Include="..\..\Library\DiscUtils.Core\DiscUtils.Core.csproj" />
-    <ProjectReference Include="..\..\Library\DiscUtils.Ntfs\DiscUtils.Ntfs.csproj" />
   </ItemGroup>
 
 </Project>
