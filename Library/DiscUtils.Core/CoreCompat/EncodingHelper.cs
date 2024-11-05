@@ -1,4 +1,4 @@
-﻿#if !NET48 && !NET45
+﻿#if !NET45 && !NET472 && !NET48
 using System.Text;
 #endif
 
@@ -15,7 +15,7 @@ namespace DiscUtils.CoreCompat
 
             _registered = true;
 
-#if !NET48 && !NET45
+#if !NET45 && !NET472 && !NET48
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
         }

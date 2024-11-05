@@ -34,30 +34,17 @@ namespace LibraryTests.HfsPlus
     public class HfsTest
     {
         private const string SystemVersionPath = @"System\Library\CoreServices\SystemVersion.plist";
-        private const string DeviceSupportPath = "/Applications/Xcode.app/Content/Developer/Platforms/iPhoneOS.Platform/DeviceSupport/";
+        private const string DeviceImagePath = @"D:\iPod\G1-1.0.img";
         static HfsTest()
         {
             SetupHelper.RegisterAssembly(typeof(HfsPlusFileSystem).Assembly);
         }
 
-#if NETCOREAPP
-        public static IEnumerable<object[]> GetDeveloperDiskImages()
+        #if NETCOREAPP
+        [Fact]
+        public void ReadFilesystemTest()
         {
-            if (!Directory.Exists(DeviceSupportPath))
-            {
-                yield break;
-            }
-
-            foreach (var directory in Directory.GetDirectories(DeviceSupportPath))
-            {
-                yield return new object[] { Path.Combine(directory, "DeveloperDiskImage.dmg") };
-            }
-        }
-
-        [MemberData(nameof(GetDeveloperDiskImages))]
-        [MacOSOnlyTheory]
-        public void ReadFilesystemTest(string path)
-        {
+            string path = DeviceImagePath;
             using (Stream developerDiskImageStream = File.OpenRead(path))
             using (var disk = new Disk(developerDiskImageStream, Ownership.None))
             {
@@ -65,6 +52,10 @@ namespace LibraryTests.HfsPlus
                 var volumes = VolumeManager.GetPhysicalVolumes(disk);
                 foreach (var volume in volumes)
                 {
+                    if (volume.Partition.TypeAsString != "Apple_HFS")
+                    {
+                        continue;
+                    }
                     var fileSystems = FileSystemManager.DetectFileSystems(volume);
 
                     var fileSystem = Assert.Single(fileSystems);
