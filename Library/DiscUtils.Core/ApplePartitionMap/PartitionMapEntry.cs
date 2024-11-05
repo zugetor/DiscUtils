@@ -108,7 +108,14 @@ namespace DiscUtils.ApplePartitionMap
 
         public override SparseStream Open()
         {
-            return new SubStream(_diskStream, PhysicalBlockStart * BlockSize, PhysicalBlocks * BlockSize);
+            long startPosition = PhysicalBlockStart * BlockSize;
+            long partLength = LogicalBlocks;
+            if (LogicalBlocks == 0)
+            {
+                partLength = ((BootBlock > LogicalBlockStart) ? BootBlock : PhysicalBlocks) - LogicalBlockStart;
+            }
+            partLength = partLength * BlockSize;
+            return new SubStream(_diskStream, startPosition, partLength);
         }
     }
 }
