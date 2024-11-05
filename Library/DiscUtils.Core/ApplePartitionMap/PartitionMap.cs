@@ -45,21 +45,23 @@ namespace DiscUtils.ApplePartitionMap
             _stream = stream;
 
             stream.Position = 0;
-            byte[] initialBytes = StreamUtilities.ReadExact(stream, 1024);
+            byte[] initialBytes = StreamUtilities.ReadExact(stream, 512);
 
             BlockZero b0 = new BlockZero();
             b0.ReadFrom(initialBytes, 0);
 
-            PartitionMapEntry initialPart = new PartitionMapEntry(_stream);
-            initialPart.ReadFrom(initialBytes, 512);
+            stream.Position = b0.Size;
+            byte[] pmBytes = StreamUtilities.ReadExact(stream, b0.Size);
+            PartitionMapEntry initialPart = new PartitionMapEntry(_stream, (ushort)b0.Size);
+            initialPart.ReadFrom(pmBytes, 0);
 
-            byte[] partTableData = StreamUtilities.ReadExact(stream, (int)(initialPart.MapEntries - 1) * 512);
+            byte[] partTableData = StreamUtilities.ReadExact(stream, (int)(initialPart.MapEntries - 1) * b0.Size);
 
             _partitions = new PartitionMapEntry[initialPart.MapEntries - 1];
             for (uint i = 0; i < initialPart.MapEntries - 1; ++i)
             {
-                _partitions[i] = new PartitionMapEntry(_stream);
-                _partitions[i].ReadFrom(partTableData, (int)(512 * i));
+                _partitions[i] = new PartitionMapEntry(_stream, (ushort)b0.Size);
+                _partitions[i].ReadFrom(partTableData, (int)(b0.Size * i));
             }
         }
 

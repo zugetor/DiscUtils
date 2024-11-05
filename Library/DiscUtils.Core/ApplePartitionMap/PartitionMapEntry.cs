@@ -41,10 +41,12 @@ namespace DiscUtils.ApplePartitionMap
         public uint PhysicalBlockStart;
         public ushort Signature;
         public string Type;
+        public ushort BlockSize;
 
-        public PartitionMapEntry(Stream diskStream)
+        public PartitionMapEntry(Stream diskStream, ushort blockSize)
         {
             _diskStream = diskStream;
+            BlockSize = blockSize;
         }
 
         public override byte BiosType
@@ -79,7 +81,7 @@ namespace DiscUtils.ApplePartitionMap
 
         public int Size
         {
-            get { return 512; }
+            get { return BlockSize; }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -96,7 +98,7 @@ namespace DiscUtils.ApplePartitionMap
             BootBlock = EndianUtilities.ToUInt32BigEndian(buffer, offset + 92);
             BootBytes = EndianUtilities.ToUInt32BigEndian(buffer, offset + 96);
 
-            return 512;
+            return BlockSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -106,7 +108,7 @@ namespace DiscUtils.ApplePartitionMap
 
         public override SparseStream Open()
         {
-            return new SubStream(_diskStream, PhysicalBlockStart * 512, PhysicalBlocks * 512);
+            return new SubStream(_diskStream, PhysicalBlockStart * BlockSize, PhysicalBlocks * BlockSize);
         }
     }
 }

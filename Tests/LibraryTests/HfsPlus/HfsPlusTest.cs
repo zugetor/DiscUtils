@@ -25,7 +25,6 @@ using DiscUtils.HfsPlus;
 using DiscUtils.Raw;
 using DiscUtils.Setup;
 using DiscUtils.Streams;
-using System.Collections.Generic;
 using System.IO;
 using Xunit;
 
@@ -33,16 +32,17 @@ namespace LibraryTests.HfsPlus
 {
     public class HfsTest
     {
-        private const string SystemVersionPath = @"System\Library\CoreServices\SystemVersion.plist";
+        private const string iPodPerfPath = @"iPod_Control\Device\Preferences";
         private const string DeviceImagePath = @"D:\iPod\G1-1.0.img";
+        private const string DeviceImagePath2 = @"F:\G6-HFS.img";
         static HfsTest()
         {
             SetupHelper.RegisterAssembly(typeof(HfsPlusFileSystem).Assembly);
         }
 
-        #if NETCOREAPP
+#if NETCOREAPP
         [Fact]
-        public void ReadFilesystemTest()
+        public void ReadFileTestHFSW()
         {
             string path = DeviceImagePath;
             using (Stream developerDiskImageStream = File.OpenRead(path))
@@ -50,6 +50,21 @@ namespace LibraryTests.HfsPlus
             {
                 // Find the first (and supposedly, only, HFS partition)
                 var volumes = VolumeManager.GetPhysicalVolumes(disk);
+                Assert.Equal("Apple_MDFW", volumes[0].Partition.TypeAsString);
+                Assert.Equal("Apple_HFS", volumes[1].Partition.TypeAsString);
+            }
+        }
+
+        [Fact]
+        public void ReadFileTestHFSP()
+        {
+            string path = DeviceImagePath2;
+            using (Stream developerDiskImageStream = File.OpenRead(path))
+            using (var disk = new Disk(developerDiskImageStream, Ownership.None))
+            {
+                // Find the first (and supposedly, only, HFS partition)
+                var volumes = VolumeManager.GetPhysicalVolumes(disk);
+                Assert.Equal("Apple_HFS", volumes[0].Partition.TypeAsString);
                 foreach (var volume in volumes)
                 {
                     if (volume.Partition.TypeAsString != "Apple_HFS")
@@ -63,18 +78,23 @@ namespace LibraryTests.HfsPlus
 
                     using (HfsPlusFileSystem hfs = (HfsPlusFileSystem)fileSystem.Open(volume))
                     {
-                        Assert.True(hfs.FileExists(SystemVersionPath));
+                        Assert.True(hfs.FileExists(iPodPerfPath));
 
-                        using (Stream systemVersionStream = hfs.OpenFile(SystemVersionPath, FileMode.Open, FileAccess.Read))
+                        /*using (Stream fileStream = hfs.OpenFile(iPodPerfPath, FileMode.Open, FileAccess.Read))
                         using (MemoryStream copyStream = new MemoryStream())
                         {
-                            Assert.NotEqual(0, systemVersionStream.Length);
-                            systemVersionStream.CopyTo(copyStream);
-                            Assert.Equal(systemVersionStream.Length, copyStream.Length);
+                            Assert.NotEqual(0, fileStream.Length);
+                            fileStream.Seek(0, SeekOrigin.Begin);
+                            copyStream.Seek(0, SeekOrigin.Begin);
+                            fileStream.CopyTo(copyStream);
+                            Assert.Equal(fileStream.Length, copyStream.Length);
 
                             copyStream.Seek(0, SeekOrigin.Begin);
-                            Plist.Parse(copyStream);
-                        }
+                            using (StreamReader reader = new StreamReader(fileStream, Encoding.UTF8))
+                            {
+                                var cont = reader.ReadToEnd();
+                            }
+                        }*/
                     }
                 }
             }

@@ -38,7 +38,7 @@ namespace DiscUtils.ApplePartitionMap
 
             s.Position = 0;
 
-            byte[] initialBytes = StreamUtilities.ReadExact(s, 1024);
+            byte[] initialBytes = StreamUtilities.ReadExact(s, 512);
 
             BlockZero b0 = new BlockZero();
             b0.ReadFrom(initialBytes, 0);
@@ -47,8 +47,10 @@ namespace DiscUtils.ApplePartitionMap
                 return false;
             }
 
-            PartitionMapEntry initialPart = new PartitionMapEntry(s);
-            initialPart.ReadFrom(initialBytes, 512);
+            s.Position = b0.Size;
+            byte[] pmBytes = StreamUtilities.ReadExact(s, b0.Size);
+            PartitionMapEntry initialPart = new PartitionMapEntry(s, (ushort)b0.Size);
+            initialPart.ReadFrom(pmBytes, 0);
 
             return initialPart.Signature == 0x504d;
         }
