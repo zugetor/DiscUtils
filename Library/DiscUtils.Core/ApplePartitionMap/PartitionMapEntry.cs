@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Core.HfsWrapper;
 using DiscUtils.Partitions;
 using DiscUtils.Streams;
 
@@ -41,10 +42,12 @@ namespace DiscUtils.ApplePartitionMap
         public uint PhysicalBlockStart;
         public ushort Signature;
         public string Type;
+        public ushort BlockSize;
 
-        public PartitionMapEntry(Stream diskStream)
+        public PartitionMapEntry(Stream diskStream, ushort blockSize)
         {
             _diskStream = diskStream;
+            BlockSize = blockSize;
         }
 
         public override byte BiosType
@@ -79,7 +82,7 @@ namespace DiscUtils.ApplePartitionMap
 
         public int Size
         {
-            get { return 512; }
+            get { return BlockSize; }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -96,7 +99,7 @@ namespace DiscUtils.ApplePartitionMap
             BootBlock = EndianUtilities.ToUInt32BigEndian(buffer, offset + 92);
             BootBytes = EndianUtilities.ToUInt32BigEndian(buffer, offset + 96);
 
-            return 512;
+            return BlockSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)
@@ -106,7 +109,25 @@ namespace DiscUtils.ApplePartitionMap
 
         public override SparseStream Open()
         {
-            return new SubStream(_diskStream, PhysicalBlockStart * 512, PhysicalBlocks * 512);
+            long startPosition = PhysicalBlockStart * BlockSize;
+            long partLength = LogicalBlocks;
+            if (LogicalBlocks == 0)
+            {
+                partLength = ((BootBlock > LogicalBlockStart) ? BootBlock : PhysicalBlocks) - LogicalBlockStart;
+            }
+            partLength = partLength * BlockSize;
+
+            _diskStream.Position = startPosition + 1024;
+            byte[] headerBuf = StreamUtilities.ReadExact(_diskStream, 512);
+            VolumeHeader hdr = new VolumeHeader();
+            hdr.ReadFrom(headerBuf, 0);
+            if (hdr.IsValid)
+            {
+                ExtDescriptor ext = hdr.DrEmbedExtent;
+                startPosition = startPosition + ((hdr.DrAlBlSt * BlockSize) + (ext.FirstAllocationBlock * (long)hdr.DrAlBlkSiz));
+                partLength = ext.NumberOfAllocationBlocks * (long)hdr.DrAlBlkSiz;
+            }
+            return new SubStream(_diskStream, startPosition, partLength);
         }
     }
 }

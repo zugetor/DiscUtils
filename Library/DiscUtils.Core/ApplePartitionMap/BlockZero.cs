@@ -37,7 +37,7 @@ namespace DiscUtils.ApplePartitionMap
 
         public int Size
         {
-            get { return 512; }
+            get { return BlockSize; }
         }
 
         public int ReadFrom(byte[] buffer, int offset)
@@ -50,7 +50,7 @@ namespace DiscUtils.ApplePartitionMap
             DriverData = EndianUtilities.ToUInt32BigEndian(buffer, offset + 12);
             DriverCount = EndianUtilities.ToUInt16LittleEndian(buffer, offset + 16);
 
-            return 512;
+            return BlockSize;
         }
 
         public void WriteTo(byte[] buffer, int offset)
