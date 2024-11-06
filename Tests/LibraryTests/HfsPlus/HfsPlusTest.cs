@@ -43,19 +43,51 @@ namespace LibraryTests.HfsPlus
         }
 
 #if NETCOREAPP
-        /*[Fact]
+        [Fact]
         public void ReadFileTestHFSW()
         {
             string path = DeviceImagePath;
             using (Stream developerDiskImageStream = File.OpenRead(path))
             using (var disk = new Disk(developerDiskImageStream, Ownership.None))
             {
-                // Find the first (and supposedly, only, HFS partition)
                 var volumes = VolumeManager.GetPhysicalVolumes(disk);
                 Assert.Equal("Apple_MDFW", volumes[0].Partition.TypeAsString);
                 Assert.Equal("Apple_HFS", volumes[1].Partition.TypeAsString);
+
+                var fileSystems = FileSystemManager.DetectFileSystems(volumes[1]);
+                var fileSystem = Assert.Single(fileSystems);
+                Assert.Equal("HFS+", fileSystem.Name);
+                using (HfsPlusFileSystem hfs = new HfsPlusFileSystem(volumes[1].Open()))
+                {
+                    Assert.True(hfs.FileExists(iPodPerfPath));
+
+                    using (Stream fileStream = hfs.OpenFile(iPodPerfPath, FileMode.Open, FileAccess.Read))
+                    using (MemoryStream copyStream = new MemoryStream())
+                    {
+                        Assert.NotEqual(0, fileStream.Length);
+                        fileStream.CopyTo(copyStream);
+                        Assert.Equal(fileStream.Length, copyStream.Length);
+
+                        copyStream.Seek(0, SeekOrigin.Begin);
+                        fileStream.Seek(0, SeekOrigin.Begin);
+                        byte[] buffer1 = new byte[fileStream.Length];
+                        byte[] buffer2 = new byte[fileStream.Length];
+
+                        while (true)
+                        {
+                            int bytesRead1 = fileStream.Read(buffer1, 0, (int)fileStream.Length);
+                            int bytesRead2 = copyStream.Read(buffer2, 0, (int)fileStream.Length);
+
+                            Assert.Equal(bytesRead1, bytesRead2);
+
+                            if (bytesRead1 == 0) break;
+
+                            Assert.True(buffer1.Take(bytesRead1).SequenceEqual(buffer2.Take(bytesRead2)));
+                        }
+                    }
+                }
             }
-        }*/
+        }
 
         [Fact]
         public void ReadFileTestHFSP()

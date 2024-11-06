@@ -22,6 +22,7 @@
 
 using System;
 using System.IO;
+using DiscUtils.Core.HfsWrapper;
 using DiscUtils.Partitions;
 using DiscUtils.Streams;
 
@@ -115,6 +116,17 @@ namespace DiscUtils.ApplePartitionMap
                 partLength = ((BootBlock > LogicalBlockStart) ? BootBlock : PhysicalBlocks) - LogicalBlockStart;
             }
             partLength = partLength * BlockSize;
+
+            _diskStream.Position = startPosition + 1024;
+            byte[] headerBuf = StreamUtilities.ReadExact(_diskStream, 512);
+            VolumeHeader hdr = new VolumeHeader();
+            hdr.ReadFrom(headerBuf, 0);
+            if (hdr.IsValid)
+            {
+                ExtDescriptor ext = hdr.DrEmbedExtent;
+                startPosition = startPosition + ((hdr.DrAlBlSt * BlockSize) + (ext.FirstAllocationBlock * (long)hdr.DrAlBlkSiz));
+                partLength = ext.NumberOfAllocationBlocks * (long)hdr.DrAlBlkSiz;
+            }
             return new SubStream(_diskStream, startPosition, partLength);
         }
     }
